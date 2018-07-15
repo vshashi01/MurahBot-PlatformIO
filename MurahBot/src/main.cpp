@@ -1,5 +1,7 @@
 #include <Arduino.h>
 #include <Wheels.h>
+#include <TaskScheduler.h>
+#include <TaskSchedulerDeclarations.h>
 
 
 void setup() {
