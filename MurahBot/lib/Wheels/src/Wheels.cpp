@@ -63,7 +63,7 @@ int Wheel::getWheelAbsoluteSpeed(MinMaxRange rangeValue) {
 	else if (rangeValue == MAX)
 		return _maxWheelAbsoluteSpeed;
 	else
-		return NULL;
+		return -1;
 }
 
 //resets the Absolute Speed values 
@@ -106,7 +106,7 @@ int Drive4Wheel::getDriveSpeed(MinMaxRange rangeValue) {
 	else if (rangeValue == MAX)
 		return _maxDriveSpeed;
 	else
-		return NULL;
+		return -1;
 }
 
 //returns the tolerance value for speed ranges

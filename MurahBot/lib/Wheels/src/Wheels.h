@@ -14,7 +14,7 @@ enum MinMaxRange : uint8_t {
 class Wheel {
 
 public:
-	Wheel(int pin1 = NULL, int pin2 = NULL, int pinSetSpeed = NULL,
+	Wheel(int pin1 = -1, int pin2 = -1, int pinSetSpeed = -1,
 		int minWheelAbsoluteSpeed = 120, int maxWheelAbsoluteSpeed = 255); //default constructor with default absolute speed values
 	
 	Wheel(const Wheel& AWheel); //copy constructor 
@@ -85,7 +85,6 @@ public:
 	DriveState getCurrentDriveState();
 
 private:
-	int _speedToleranceRange; //the tolerance between the absolute speeds of the Wheel instance and allowable drive speed
 	static int _maxDriveSpeed;
 	static int _minDriveSpeed;
 	DriveState _driveState; //return to robot drive state based on the wheel spin conditions
@@ -96,7 +95,7 @@ private:
 	Wheel* _RightFrontWheel;
 	Wheel* _LeftRearWheel;
 	Wheel* _RightRearWheel;
-	
+	int _speedToleranceRange; //the tolerance between the absolute speeds of the Wheel instance and allowable drive speed
 };
 
 
