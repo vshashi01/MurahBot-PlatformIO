@@ -83,10 +83,10 @@ int Wheel::limitWheelSpeed(int wheelSpeed) {
 //default constructor for 4 wheel drives robot 
 //stores the pointer of each wheel objects to local wheel object pointer for easy access 
 //stores the speed tolerance range to set the min and max drive speed
-Drive4Wheel::Drive4Wheel(Wheel* LeftFrontWheel, Wheel* RightFrontWheel,
-	Wheel* LeftRearWheel, Wheel* RightRearWheel, int speedToleranceRange)
-	:_LeftFrontWheel(LeftFrontWheel), _RightFrontWheel(RightFrontWheel),
-	_LeftRearWheel(LeftRearWheel), _RightRearWheel(RightRearWheel), _speedToleranceRange(speedToleranceRange) {
+Drive4Wheel::Drive4Wheel(Wheel& LeftFrontWheel, Wheel& RightFrontWheel,
+	Wheel& LeftRearWheel, Wheel& RightRearWheel, int speedToleranceRange)
+	:_LeftFrontWheel(&LeftFrontWheel), _RightFrontWheel(&RightFrontWheel),
+	_LeftRearWheel(&LeftRearWheel), _RightRearWheel(&RightRearWheel), _speedToleranceRange(speedToleranceRange) {
 	initDrive4Wheel();
 }
 
@@ -96,7 +96,7 @@ int Drive4Wheel::_maxDriveSpeed = 0;
 
 //called during the instantiation pf the Drive4Wheel class 
 void Drive4Wheel::initDrive4Wheel() {
-	setDriveSpeed();
+	_setDriveSpeed();
 }
 
 //returns drive speed 
@@ -117,7 +117,7 @@ int Drive4Wheel::getSpeedToleranceRange() {
 //sets the tolerance value for speed ranges
 void Drive4Wheel::setSpeedToleranceRange(int speedTolerance) {
 	_speedToleranceRange = speedTolerance;
-	setDriveSpeed();
+	_setDriveSpeed();
 }
 
 int Drive4Wheel::limitDriveSpeed(int driveSpeed) {
@@ -220,7 +220,7 @@ Drive4Wheel::DriveState Drive4Wheel::getCurrentDriveState() {
 }
 
 //private method to update the drive speed values
-void Drive4Wheel::setDriveSpeed() {
+void Drive4Wheel::_setDriveSpeed() {
 	_minDriveSpeed = max(_LeftFrontWheel->getWheelAbsoluteSpeed(MIN), max(_RightFrontWheel->getWheelAbsoluteSpeed(MIN),
 		max(_LeftRearWheel->getWheelAbsoluteSpeed(MIN), _RightRearWheel->getWheelAbsoluteSpeed(MIN))));
 	_maxDriveSpeed = min(_LeftFrontWheel->getWheelAbsoluteSpeed(MAX), min(_RightFrontWheel->getWheelAbsoluteSpeed(MAX),
