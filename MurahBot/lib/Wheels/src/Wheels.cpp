@@ -1,4 +1,5 @@
 #include <Arduino.h>
+
 #include "Wheels.h"
 
 //default constructor: upon instantiation all the pin values and absolute speeds are stored in class variables 
@@ -6,6 +7,7 @@ Wheel::Wheel(int pin1, int pin2, int pinSetSpeed, int minWheelAbsoluteSpeed, int
 	:_pinForward(pin1), _pinBackward(pin2), _pinSetSpeed(pinSetSpeed), 
 	_minWheelAbsoluteSpeed(minWheelAbsoluteSpeed), _maxWheelAbsoluteSpeed(maxWheelAbsoluteSpeed)  {
 	initWheel();
+	
 }
 
 //copy constructor 
@@ -20,9 +22,9 @@ Wheel::Wheel(const Wheel& AWheel) {
 //called during instantiation automatically, sets-up the pins and state variables to appropriate states 
 void Wheel::initWheel() {
 	_spinState = WHEEL_NO_SPIN;
-	pinMode(_pinForward, OUTPUT);
-	pinMode(_pinBackward, OUTPUT);
-	pinMode(_pinSetSpeed, OUTPUT);
+	_pinForward.mode(OUTPUT);
+	_pinBackward.mode(OUTPUT);
+	pinMode(_pinSetSpeed, OUTPUT); //the analog pin
 }
 
 // returns _spinState
@@ -33,8 +35,8 @@ Wheel::WheelState Wheel::getCurrentWheelState() {
 //set spin Forward 
 void Wheel::setSpinForward(int speed) {
 	speed = limitWheelSpeed(speed);
-	digitalWrite(_pinForward, HIGH);
-	digitalWrite(_pinBackward, LOW);
+	_pinForward.high();
+	_pinBackward.low();
 	analogWrite(_pinSetSpeed, speed);
 	_spinState = WHEEL_SPIN_FORWARD;
 }
@@ -42,16 +44,16 @@ void Wheel::setSpinForward(int speed) {
 //set spin Backward 
 void Wheel::setSpinBackward(int speed) {
 	speed = limitWheelSpeed(speed);
-	digitalWrite(_pinForward, LOW);
-	digitalWrite(_pinBackward, HIGH);
+	_pinBackward.high();
+	_pinForward.low();
 	analogWrite(_pinSetSpeed, speed);
 	_spinState = WHEEL_SPIN_BACKWARD;
 }
 
 //set spin Stop
 void Wheel::setSpinStop() {
-	digitalWrite(_pinForward, LOW);
-	digitalWrite(_pinBackward, LOW);
+	_pinForward.low();
+	_pinBackward.low();
 	analogWrite(_pinSetSpeed, 0);
 	_spinState = WHEEL_NO_SPIN;
 }
@@ -73,15 +75,15 @@ void Wheel::setWheelAbsoluteSpeed(int minSpeedAbsolute, int maxSpeedAbsolute) {
 }
 
 int Wheel::limitWheelSpeed(int wheelSpeed) {
-	if (wheelSpeed > _maxWheelAbsoluteSpeed)wheelSpeed = _maxWheelAbsoluteSpeed;
-	else if (wheelSpeed < _minWheelAbsoluteSpeed)wheelSpeed = _minWheelAbsoluteSpeed;
+	if (wheelSpeed > _maxWheelAbsoluteSpeed) wheelSpeed = _maxWheelAbsoluteSpeed;
+	else if (wheelSpeed < _minWheelAbsoluteSpeed) wheelSpeed = _minWheelAbsoluteSpeed;
 	else wheelSpeed = wheelSpeed;
 	return wheelSpeed;
 }
 
 
 //default constructor for 4 wheel drives robot 
-//stores the pointer of each wheel objects to local wheel object pointer for easy access 
+//stores the address of each wheel objects to local wheel object pointer for easy access 
 //stores the speed tolerance range to set the min and max drive speed
 Drive4Wheel::Drive4Wheel(Wheel& LeftFrontWheel, Wheel& RightFrontWheel,
 	Wheel& LeftRearWheel, Wheel& RightRearWheel, int speedToleranceRange)
@@ -89,10 +91,10 @@ Drive4Wheel::Drive4Wheel(Wheel& LeftFrontWheel, Wheel& RightFrontWheel,
 	_LeftRearWheel(&LeftRearWheel), _RightRearWheel(&RightRearWheel), _speedToleranceRange(speedToleranceRange) {
 	initDrive4Wheel();
 }
-
+/*
 //initializing the speed variables with 0 
 int Drive4Wheel::_minDriveSpeed = 0;
-int Drive4Wheel::_maxDriveSpeed = 0;
+int Drive4Wheel::_maxDriveSpeed = 0;*/
 
 //called during the instantiation pf the Drive4Wheel class 
 void Drive4Wheel::initDrive4Wheel() {
@@ -120,6 +122,8 @@ void Drive4Wheel::setSpeedToleranceRange(int speedTolerance) {
 	_setDriveSpeed();
 }
 
+//checks the input speed and ensures that the speed is capped to the max or min Drive speeds allowed for the Drive4Wheel class 
+//not invoked by any other methods of Drive4Wheel class (made available for users of Drive4Wheel class)
 int Drive4Wheel::limitDriveSpeed(int driveSpeed) {
 	if (driveSpeed > _maxDriveSpeed)driveSpeed = _maxDriveSpeed;
 	else if (driveSpeed < _minDriveSpeed)driveSpeed = _minDriveSpeed;

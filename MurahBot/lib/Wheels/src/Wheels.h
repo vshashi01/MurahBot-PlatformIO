@@ -1,6 +1,6 @@
 // Wheels.h
 //#include <>
-
+#include <DigitalIO.h>
 
 #ifndef _WHEELS_h
 #define _WHEELS_h
@@ -38,14 +38,18 @@ public:
 	
 
 private:
-	int _pinForward; //pin that turns wheel forward with a High (relative to the robot)
-	int _pinBackward; //pin that turns wheel backward with a High (relative to the robot)
+	//int _pinForward; //pin that turns wheel forward with a High (relative to the robot)
+	//int _pinBackward; //pin that turns wheel backward with a High (relative to the robot)
+	PinIO _pinForward;
+	PinIO _pinBackward;
 	int _pinSetSpeed; //pin that controls motor speed, analogWrite()
 	Wheel::WheelState _spinState; // tracks the state/direction of wheel spin
 	int _minWheelAbsoluteSpeed;  //lowest speed the wheel can turn 
 	int _maxWheelAbsoluteSpeed;	//highest speed the wheel can turn 
 
 	int limitWheelSpeed(int wheelSpeed); //checks if wheel speed within absolute range, if not clips it 
+	
+	//PinIO* _pinSetSpeed;
 			
 };
 
@@ -59,7 +63,7 @@ public:
 	//initialize the drive speed for the drive4wheel object 
 	void initDrive4Wheel();  
 
-	//method to check and limit 
+	//method to check and limit the speed before invoking the drive methods for users //not neccesary for all cases 
 	int limitDriveSpeed(int driveSpeed); 
 	
 	//methods to drive 
@@ -85,8 +89,8 @@ public:
 	DriveState getCurrentDriveState();
 
 private:
-	static int _maxDriveSpeed;
-	static int _minDriveSpeed;
+	int _maxDriveSpeed = 0;
+	int _minDriveSpeed = 0;
 	DriveState _driveState; //return to robot drive state based on the wheel spin conditions
 
 	void _setDriveSpeed(); //private method to update the drive speeds with the current _speedToleranceRange value
