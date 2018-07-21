@@ -69,8 +69,8 @@ public:
 	void goBackward(int speed);
 	void goLeft(int wheelSpeed, float speedRatio = 1.0);
 	void goRight(int wheelSpeed, float speedRatio = 1.0);
-	void swayLeft(int wheelSpeed, float speedRatio = 0.8, bool reverse = false);
-	void swayRight(int wheelSpeed, float speedRatio = 0.8, bool reverse = false);
+	void swayLeft(int wheelSpeed, float speedRatio = 0.6, bool reverse = false);
+	void swayRight(int wheelSpeed, float speedRatio = 0.6, bool reverse = false);
 	void stop();
 
 	enum DriveState : uint8_t {
