@@ -91,10 +91,7 @@ Drive4Wheel::Drive4Wheel(Wheel& LeftFrontWheel, Wheel& RightFrontWheel,
 	_LeftRearWheel(&LeftRearWheel), _RightRearWheel(&RightRearWheel), _speedToleranceRange(speedToleranceRange) {
 	initDrive4Wheel();
 }
-/*
-//initializing the speed variables with 0 
-int Drive4Wheel::_minDriveSpeed = 0;
-int Drive4Wheel::_maxDriveSpeed = 0;*/
+
 
 //called during the instantiation pf the Drive4Wheel class 
 void Drive4Wheel::initDrive4Wheel() {

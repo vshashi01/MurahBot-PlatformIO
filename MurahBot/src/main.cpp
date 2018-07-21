@@ -4,7 +4,7 @@
 #include <TaskScheduler.h>
 #include <TaskSchedulerDeclarations.h>
 #include <Bounce2.h>
-#include <digitalWriteFast.h>
+#include <DigitalIO.h>
 
 #define BLYNK_USE_DIRECT_CONNECT
 #define MurahBotBT Serial1
@@ -51,7 +51,8 @@ enum SystemStates {
 SystemStates prevSystemState = NO_STATE;
 SystemStates currSystemState = PASSIVE; // 
 SystemStates currBlynkState = PASSIVE;
-int ledPin = 13; //on-board LED 
+//int ledPin = 13; //on-board LED 
+DigitalPin<13> ledPin;
 
 ///////////////////////////////////////////////////////////////////////////////
 //function prototypes 
@@ -82,7 +83,6 @@ Task taskRunBlynk(TASK_IMMEDIATE, TASK_FOREVER, &callbackBlynk, &MurahBotSchedul
 void setup() {
 
     pinMode(buttonPinRobotStartStop, INPUT_PULLUP); //initialize the button
-
 	Serial.begin(9600);
 	delay(500);
 	MurahBotBT.begin(115200); //starts the BLE module 
@@ -92,7 +92,7 @@ void setup() {
 	taskUpdateButton.enable();
 
 	//on board LED 
-	pinMode(ledPin, OUTPUT);
+	ledPin.mode(OUTPUT);
 	digitalWrite(ledPin, LOW);    
 }
 
