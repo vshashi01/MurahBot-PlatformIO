@@ -80,6 +80,7 @@ Task taskRunBlynk(TASK_IMMEDIATE, TASK_FOREVER, &callbackBlynk, &MurahBotSchedul
 
 
 
+
 void setup() {
 
     pinMode(buttonPinRobotStartStop, INPUT_PULLUP); //initialize the button
@@ -194,6 +195,12 @@ int joystickY = 127;
 float smallestRatio = 45;
 float biggestRatio = 60;
 
+//static variables for the Drive Speeds 
+static int minSpeed = murahDrive.getDriveSpeed(MIN);
+static int maxSpeed = murahDrive.getDriveSpeed(MAX);
+//everytime drive Speeds are changed in runtime, 
+//call these lines immediately to update the variable 
+
 //Blynk input of joystick values 
 BLYNK_WRITE(V1) {
 	joystickX = param[0].asInt();
@@ -211,10 +218,6 @@ void callbackPrimaryJoystickDrive() {
 		taskDrive.setCallback(&callbackSecondaryJoystickDrive);
 		return;
 	}
-
-	//initializes the current allowable driveSpeeds as temp variable 
-	int minSpeed = murahDrive.getDriveSpeed(MIN);
-	int maxSpeed = murahDrive.getDriveSpeed(MAX);
 
 	// temp variable 
 	int speed;
@@ -246,10 +249,7 @@ void callbackPrimaryJoystickDrive() {
 
 //updates the Secondary controls for Joystick: Sway Left and Right in Forward and Backward
 void callbackSecondaryJoystickDrive() {
-	//initializes the current allowable drive Speeds
-	int minSpeed = murahDrive.getDriveSpeed(MIN);
-	int maxSpeed = murahDrive.getDriveSpeed(MAX);
-
+	
 	//temp variables
 	int speed;
 	float swayRatio = 0.45;
@@ -284,3 +284,5 @@ void callbackDisplayDriveState() {
 
 	taskDrive.setCallback(&callbackPrimaryJoystickDrive);
 }
+
+
