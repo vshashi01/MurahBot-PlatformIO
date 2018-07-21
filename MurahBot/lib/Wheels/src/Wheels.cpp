@@ -1,5 +1,5 @@
 #include <Arduino.h>
-
+#include <DigitalIO.h>
 #include "Wheels.h"
 
 //default constructor: upon instantiation all the pin values and absolute speeds are stored in class variables 
@@ -10,13 +10,15 @@ Wheel::Wheel(int pin1, int pin2, int pinSetSpeed, int minWheelAbsoluteSpeed, int
 	
 }
 
+int Wheel::_numberOfWheels = 0;
+
 //copy constructor 
 Wheel::Wheel(const Wheel& AWheel) {
 	_pinForward = AWheel._pinForward;
 	_pinBackward = AWheel._pinBackward;
 	_pinSetSpeed = AWheel._pinSetSpeed;
 	_minWheelAbsoluteSpeed = AWheel._minWheelAbsoluteSpeed;
-	_maxWheelAbsoluteSpeed = AWheel._maxWheelAbsoluteSpeed;
+	_maxWheelAbsoluteSpeed = AWheel._maxWheelAbsoluteSpeed;	
 }
 
 //called during instantiation automatically, sets-up the pins and state variables to appropriate states 
@@ -25,6 +27,8 @@ void Wheel::initWheel() {
 	_pinForward.mode(OUTPUT);
 	_pinBackward.mode(OUTPUT);
 	pinMode(_pinSetSpeed, OUTPUT); //the analog pin
+
+	_numberOfWheels++;
 }
 
 // returns _spinState
@@ -34,7 +38,7 @@ Wheel::WheelState Wheel::getCurrentWheelState() {
 
 //set spin Forward 
 void Wheel::setSpinForward(int speed) {
-	speed = limitWheelSpeed(speed);
+	speed = _limitWheelSpeed(speed);
 	_pinForward.high();
 	_pinBackward.low();
 	analogWrite(_pinSetSpeed, speed);
@@ -43,7 +47,7 @@ void Wheel::setSpinForward(int speed) {
 
 //set spin Backward 
 void Wheel::setSpinBackward(int speed) {
-	speed = limitWheelSpeed(speed);
+	speed = _limitWheelSpeed(speed);
 	_pinBackward.high();
 	_pinForward.low();
 	analogWrite(_pinSetSpeed, speed);
@@ -74,7 +78,8 @@ void Wheel::setWheelAbsoluteSpeed(int minSpeedAbsolute, int maxSpeedAbsolute) {
 	_maxWheelAbsoluteSpeed = maxSpeedAbsolute;
 }
 
-int Wheel::limitWheelSpeed(int wheelSpeed) {
+//method to ensure that we never program the speed outside of the allowable range
+int Wheel::_limitWheelSpeed(int wheelSpeed) {
 	if (wheelSpeed > _maxWheelAbsoluteSpeed) wheelSpeed = _maxWheelAbsoluteSpeed;
 	else if (wheelSpeed < _minWheelAbsoluteSpeed) wheelSpeed = _minWheelAbsoluteSpeed;
 	else wheelSpeed = wheelSpeed;

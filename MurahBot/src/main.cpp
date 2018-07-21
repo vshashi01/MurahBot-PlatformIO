@@ -19,14 +19,14 @@ char auth[] = "66390b83798e4495aa9d6c23724f2181"; //Blynk Authorization code
 
 ///////////////////////////////////////////////////////////////////////////
 // Wheel class and Drive4Wheel class instantiation 
-Wheel WheelFrontLeft(46, 47, 5);  //creating a pointer variable class to be passed to
+Wheel WheelFrontLeft(46, 47, 5);  //initializing each wheels with (forwardPin, backwardPin, speedPin)
 Wheel WheelFrontRight(48, 49, 4);
 Wheel WheelRearLeft(50, 51, 7);
 Wheel WheelRearRight(52, 53, 6);
 
 int speedTolerance = 30; //range of tolerance for drive speeds
 Drive4Wheel murahDrive(WheelFrontLeft, WheelFrontRight,
-	WheelRearLeft, WheelRearRight, speedTolerance);
+	WheelRearLeft, WheelRearRight, speedTolerance); //initializing the Drive class with all drive system methods
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -51,7 +51,6 @@ enum SystemStates {
 SystemStates prevSystemState = NO_STATE;
 SystemStates currSystemState = PASSIVE; // 
 SystemStates currBlynkState = PASSIVE;
-//int ledPin = 13; //on-board LED 
 DigitalPin<13> ledPin;
 
 ///////////////////////////////////////////////////////////////////////////////

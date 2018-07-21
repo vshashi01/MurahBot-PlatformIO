@@ -34,23 +34,21 @@ public:
 
 	int getWheelAbsoluteSpeed(MinMaxRange rangeValue); //return _minWheelAbsoluteSpeed / _maxAbsoluteSpeed
 	void setWheelAbsoluteSpeed(int minSpeedAbsolute, int maxSpeedAbsolute); //resets the _min/_max Wheel Absolute Speed
-	
-	
 
+	//void getNumberOfWheels(); //method to return the number of wheels initialized 
+	
 private:
-	//int _pinForward; //pin that turns wheel forward with a High (relative to the robot)
-	//int _pinBackward; //pin that turns wheel backward with a High (relative to the robot)
-	PinIO _pinForward;
-	PinIO _pinBackward;
+	 
+	PinIO _pinForward; //pin that turns wheel forward with a High (relative to the robot)
+	PinIO _pinBackward; //pin that turns wheel backward with a High (relative to the robot)
 	int _pinSetSpeed; //pin that controls motor speed, analogWrite()
 	Wheel::WheelState _spinState; // tracks the state/direction of wheel spin
 	int _minWheelAbsoluteSpeed;  //lowest speed the wheel can turn 
 	int _maxWheelAbsoluteSpeed;	//highest speed the wheel can turn 
 
-	int limitWheelSpeed(int wheelSpeed); //checks if wheel speed within absolute range, if not clips it 
-	
-	//PinIO* _pinSetSpeed;
-			
+	static int _numberOfWheels; //internally stores the number of Wheel initialized
+
+	int _limitWheelSpeed(int wheelSpeed); //checks if wheel speed within absolute range, if not clips it 	
 };
 
 
@@ -100,6 +98,8 @@ private:
 	Wheel* _LeftRearWheel;
 	Wheel* _RightRearWheel;
 	int _speedToleranceRange; //the tolerance between the absolute speeds of the Wheel instance and allowable drive speed
+
+	
 };
 
 
