@@ -64,6 +64,7 @@ void callbackEnableDisableDrive(); //callback to ON and OFF drive system
 
 bool onEnableBlynk();
 void callbackBlynk(); //callback for Blynk connection 
+void callbackCheckBlynkConnection();
 
 void callbackPrimaryJoystickDrive();
 void callbackSecondaryJoystickDrive();
@@ -92,7 +93,7 @@ void setup() {
 
 	//on board LED 
 	ledPin.mode(OUTPUT);
-	digitalWrite(ledPin, LOW);    
+	ledPin.low();   
 }
 
 void loop() {
@@ -165,6 +166,13 @@ bool onEnableBlynk() {
 
 void callbackBlynk() {
 	Blynk.run();
+	taskRunBlynk.setCallback(callbackCheckBlynkConnection);
+}
+
+void callbackCheckBlynkConnection() {
+	if (!Blynk.connected()) {
+		murahDrive.stop();
+	}
 	taskRunBlynk.setCallback(callbackBlynk);
 }
 
