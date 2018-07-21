@@ -4,6 +4,7 @@
 #include <TaskScheduler.h>
 #include <TaskSchedulerDeclarations.h>
 #include <Bounce2.h>
+#include <digitalWriteFast.h>
 
 #define BLYNK_USE_DIRECT_CONNECT
 #define MurahBotBT Serial1
