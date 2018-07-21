@@ -159,7 +159,7 @@ void callbackEnableDisableDrive() {
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //ensures the Blynk app is connected 
 bool onEnableBlynk() {
-	Blynk.begin(auth, MurahBotBT);
+	Blynk.begin(MurahBotBT, auth);
 	currBlynkState = ACTIVE;
 	return true;
 }
@@ -181,10 +181,10 @@ void callbackCheckBlynkConnection() {
 //to be ported to a separate .ino file in the future
 
 //constant values for jostick pad region
-const byte X_THRESHOLD_LOW = 108; //X: 128 - 20
-const byte X_THRESHOLD_HIGH = 148; //X: 128 + 20   
-const byte Y_THRESHOLD_LOW = 108;
-const byte Y_THRESHOLD_HIGH = 148;
+const byte X_THRESHOLD_LOW = 88; //X: 128 - 40
+const byte X_THRESHOLD_HIGH = 168; //X: 128 + 40   
+const byte Y_THRESHOLD_LOW = 88;
+const byte Y_THRESHOLD_HIGH = 168;
 
 // initialized the X and Y values to the center position 127
 int joystickX = 127;
@@ -252,28 +252,24 @@ void callbackSecondaryJoystickDrive() {
 
 	//temp variables
 	int speed;
-	float turnRatio = 0;
+	float swayRatio = 0.45;
 
 	//various statements to check for the Secondary conditions
 	if (joystickX < X_THRESHOLD_LOW && joystickY > Y_THRESHOLD_HIGH) {
 		speed = map(joystickY, Y_THRESHOLD_HIGH, 255, minSpeed, maxSpeed);
-		turnRatio = map(joystickX, X_THRESHOLD_LOW, 0, smallestRatio, biggestRatio); //map speed ratio 
-		murahDrive.swayLeft(speed, (turnRatio / 100)); //ratio to be converted to float value  
+		murahDrive.swayLeft(speed, swayRatio, false);  
 	}
 	else if (joystickX < X_THRESHOLD_LOW && joystickY < Y_THRESHOLD_LOW) {
 		speed = map(joystickY, Y_THRESHOLD_LOW, 0, minSpeed, maxSpeed);
-		turnRatio = map(joystickX, X_THRESHOLD_LOW, 0, smallestRatio, biggestRatio);
-		murahDrive.swayLeft(speed, (turnRatio / 100), true);
+		murahDrive.swayLeft(speed, swayRatio, true);
 	}
 	else if (joystickX > X_THRESHOLD_HIGH && joystickY > Y_THRESHOLD_HIGH) {
 		speed = map(joystickY, Y_THRESHOLD_HIGH, 255, minSpeed, maxSpeed);
-		turnRatio = map(joystickX, X_THRESHOLD_HIGH, 255, smallestRatio, biggestRatio);
-		murahDrive.swayRight(speed, (turnRatio / 100));
+		murahDrive.swayRight(speed, swayRatio, false);
 	}
 	else if (joystickX > X_THRESHOLD_HIGH && joystickY < Y_THRESHOLD_LOW) {
 		speed = map(joystickY, Y_THRESHOLD_LOW, 0, minSpeed, maxSpeed);
-		turnRatio = map(joystickX, X_THRESHOLD_HIGH, 255, smallestRatio, biggestRatio);
-		murahDrive.swayRight(speed, (turnRatio / 100), true);
+		murahDrive.swayRight(speed, swayRatio, true);
 	}
 	else murahDrive.stop();
 
@@ -283,8 +279,8 @@ void callbackSecondaryJoystickDrive() {
 
 //update drive state to be changes to update on Blynk app in future
 void callbackDisplayDriveState() {
-	Serial.print("Drive State: ");
-	Serial.println(murahDrive.getCurrentDriveState());
+	//Serial.print("Drive State: ");
+	//Serial.println(murahDrive.getCurrentDriveState());
 
 	taskDrive.setCallback(&callbackPrimaryJoystickDrive);
 }
