@@ -33,6 +33,7 @@ Drive4Wheel murahDrive(WheelFrontLeft, WheelFrontRight,
 
 // Button Pin initialization and Bounce class instantiation 
 const byte buttonPinRobotStartStop = 22; //Start and Stop Robot 
+DigitalPin<buttonPinRobotStartStop> pinRobotStartStop;
 										 //const byte buttonPinBackward = 23;
 										 //const byte buttonPinLeft = 24;
 										 //const byte buttonPinRight = 25;  //phased out to be repurposed in the future 
@@ -82,8 +83,8 @@ Task taskRunBlynk(TASK_IMMEDIATE, TASK_FOREVER, &callbackBlynk, &MurahBotSchedul
 
 
 void setup() {
-
-    pinMode(buttonPinRobotStartStop, INPUT_PULLUP); //initialize the button
+	pinRobotStartStop.mode(INPUT_PULLUP);
+    //pinMode(buttonPinRobotStartStop, INPUT_PULLUP); //initialize the button
 	Serial.begin(9600);
 	delay(500);
 	MurahBotBT.begin(115200); //starts the BLE module 
@@ -144,14 +145,14 @@ void callbackEnableDisableDrive() {
 	if (currSystemState == PASSIVE) {
 		prevSystemState = currSystemState;
 		currSystemState = ACTIVE; //changes the system state 
-		Serial.println(F("Bringing drive systems online...."));
+		//Serial.println(F("Bringing drive systems online...."));
 		taskDrive.enable();
 		if (currBlynkState == PASSIVE)taskRunBlynk.enable(); //enable only once 
 	}
 	else {
 		prevSystemState = currSystemState;
 		currSystemState = PASSIVE;
-		Serial.println(F("Shutting down drive systems..."));
+		//Serial.println(F("Shutting down drive systems..."));
 		murahDrive.stop(); //force stop the robot
 		taskDrive.disable();
 	}
