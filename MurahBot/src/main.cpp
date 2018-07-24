@@ -1,6 +1,11 @@
 
+
+
 #include <Arduino.h>
 #include <Wheels.h>
+
+#define _TASK_TIMEOUT
+
 #include <TaskScheduler.h>
 #include <TaskSchedulerDeclarations.h>
 #include <Bounce2.h>
@@ -16,14 +21,28 @@
 //Bluetooth and Blynk related declarations (if any)
 char auth[] = "66390b83798e4495aa9d6c23724f2181"; //Blynk Authorization code
 
+///////////////////////////////////////////////////////////////////////////
+#define RearLeftEncoderPin 53 //test pinchange interrupt
+#define RearRightEncoderPin 52
+#define FrontLeftEncoderPin 51
+#define FrontRightEncoderPin 50
 
+
+
+volatile int RearLeftWheelTurns = 0;
+volatile int RearRightWheelTurns = 0;
+volatile int FrontLeftWheelTurns = 0;
+volatile int FrontRightWheelTurns = 0;
+
+volatile bool counting = false;
+unsigned long startTime;
 
 ///////////////////////////////////////////////////////////////////////////
 // Wheel class and Drive4Wheel class instantiation 
-Wheel WheelFrontLeft(46, 47, 5);  //initializing each wheels with (forwardPin, backwardPin, speedPin)
-Wheel WheelFrontRight(48, 49, 4);
-Wheel WheelRearLeft(50, 51, 7);
-Wheel WheelRearRight(52, 53, 6);
+Wheel WheelFrontLeft(42, 43, 3);  //initializing each wheels with (forwardPin, backwardPin, speedPin)
+Wheel WheelFrontRight(38, 39, 4);
+Wheel WheelRearLeft(30, 31, 7);
+Wheel WheelRearRight(34, 35, 6);
 
 int speedTolerance = 30; //range of tolerance for drive speeds
 Drive4Wheel murahDrive(WheelFrontLeft, WheelFrontRight,
@@ -72,6 +91,16 @@ void callbackPrimaryJoystickDrive();
 void callbackSecondaryJoystickDrive();
 void callbackDisplayDriveState(); //callback to Drive system 
 
+void callbackattachInterrupt();
+void callbackdetachInterrupt();
+bool onEnableInterrupt();
+void onDisableInterrupt();
+
+void RearLeftWheelTurnsCount();
+void RearRightWheelTurnsCount();
+void FrontLeftWheelTurnsCount();
+void FrontRightWheelTurnsCount();
+
 ///////////////////////////////////////////////////////////////////////////////
 // Scheduler and Tasks instantiation
 Scheduler MurahBotSchedule;
@@ -80,13 +109,20 @@ Task taskEnableDisableDrive(TASK_IMMEDIATE, TASK_ONCE, &callbackEnableDisableDri
 Task taskDrive(50, TASK_FOREVER, &callbackPrimaryJoystickDrive, &MurahBotSchedule, false);
 Task taskRunBlynk(TASK_IMMEDIATE, TASK_FOREVER, &callbackBlynk, &MurahBotSchedule, false, &onEnableBlynk);
 
+Task interruptCount(TASK_IMMEDIATE, TASK_ONCE, &callbackattachInterrupt, &MurahBotSchedule, false, &onEnableInterrupt, &onDisableInterrupt);
+
 
 
 
 void setup() {
+	pinMode(RearLeftEncoderPin, INPUT_PULLUP);
+	pinMode(RearRightEncoderPin, INPUT_PULLUP);
+	pinMode(FrontLeftEncoderPin, INPUT_PULLUP);
+	pinMode(FrontRightEncoderPin, INPUT_PULLUP);
+
 	pinRobotStartStop.mode(INPUT_PULLUP);
     //pinMode(buttonPinRobotStartStop, INPUT_PULLUP); //initialize the button
-	Serial.begin(9600);
+	Serial.begin(115200);
 	delay(500);
 	MurahBotBT.begin(115200); //starts the BLE module 
 	delay(100);
@@ -284,7 +320,103 @@ void callbackDisplayDriveState() {
 	//Serial.print("Drive State: ");
 	//Serial.println(murahDrive.getCurrentDriveState());
 
+	
+	if (counting == false || murahDrive.getCurrentDriveState() == murahDrive.DRIVE_STOP){
+		
+		interruptCount.enable();
+	}
 	taskDrive.setCallback(&callbackPrimaryJoystickDrive);
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//interrupt systems
+int RearLeftWheelCurrentTurnCount;
+int RearRightWheelCurrentTurnCount;
+int FrontLeftWheelCurrentTurnCount;
+int FrontRightWheelCurrentTurnCount;
+
+//inside the interrupt
+void RearLeftWheelTurnsCount() {
+	RearLeftWheelTurns++;
+}
+
+void RearRightWheelTurnsCount() {
+	RearRightWheelTurns++;
+}
+
+void FrontLeftWheelTurnsCount() {
+	FrontLeftWheelTurns++;
+}
+
+void FrontRightWheelTurnsCount() {
+	FrontRightWheelTurns++;
+}
+
+bool onEnableInterrupt() {
+	Serial.println("Enabled Task");	
+	interruptCount.setCallback(&callbackattachInterrupt);
+	return true;
+}
+
+void callbackattachInterrupt() {
+	counting = true;
+    startTime = millis();
+	attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(RearLeftEncoderPin), &RearLeftWheelTurnsCount, RISING); //used the correct function
+	attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(RearRightEncoderPin), &RearRightWheelTurnsCount, RISING);
+	attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(FrontLeftEncoderPin), &FrontLeftWheelTurnsCount, RISING);
+	attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(FrontRightEncoderPin), &FrontRightWheelTurnsCount, RISING);
+
+	interruptCount.setCallback(&callbackdetachInterrupt);
+	interruptCount.forceNextIteration();
+}
+
+void runInterrupt(unsigned long aTimeout){
+	if (counting) return;
+
+	interruptCount.setInterval(aTimeout);
+	interruptCount.restartDelayed();
+
+	//attachPinChangeInterrupt(interruptPin, &wheelTurnsCount, CHANGE);
+
+}
+
+void callbackdetachInterrupt() {
+	if ((millis() - startTime) > 10000) {
+		
+		detachPinChangeInterrupt(digitalPinToPinChangeInterrupt(RearLeftEncoderPin));
+		detachPinChangeInterrupt(digitalPinToPinChangeInterrupt(RearRightEncoderPin));
+		detachPinChangeInterrupt(digitalPinToPinChangeInterrupt(FrontLeftEncoderPin));
+		detachPinChangeInterrupt(digitalPinToPinChangeInterrupt(FrontRightEncoderPin));
+		interruptCount.disable();
+	}
+
+	interruptCount.setCallback(&callbackdetachInterrupt);
+}
+
+
+
+void  onDisableInterrupt() {
+	Serial.println("Disabled Task");
+	counting = false;
+	RearLeftWheelCurrentTurnCount = RearLeftWheelTurns;
+	RearLeftWheelTurns = 0;
+
+	RearRightWheelCurrentTurnCount = RearRightWheelTurns;
+	RearRightWheelTurns = 0;
+
+	FrontLeftWheelCurrentTurnCount = FrontLeftWheelTurns;
+	FrontLeftWheelTurns = 0;
+
+	FrontRightWheelCurrentTurnCount = FrontRightWheelTurns;
+	FrontRightWheelTurns = 0;
+	//Serial.print("THe wheelCount is:");
+	//Serial.println(RearLeftWheelCurrentTurnCount);
+	
+	Blynk.virtualWrite(V2, RearLeftWheelCurrentTurnCount);
+	Blynk.virtualWrite(V3, RearRightWheelCurrentTurnCount);
+	Blynk.virtualWrite(V4, FrontLeftWheelCurrentTurnCount);
+	Blynk.virtualWrite(V5, FrontRightWheelCurrentTurnCount);
+
+	return;
+}
 
