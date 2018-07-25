@@ -321,7 +321,7 @@ void callbackDisplayDriveState() {
 	//Serial.println(murahDrive.getCurrentDriveState());
 
 	
-	if (counting == false || murahDrive.getCurrentDriveState() == murahDrive.DRIVE_STOP){
+	if (counting == false && murahDrive.getCurrentDriveState() != murahDrive.DRIVE_STOP){
 		
 		interruptCount.enable();
 	}
@@ -365,7 +365,7 @@ void callbackattachInterrupt() {
 	enableInterrupt(RearRightEncoderPin, &RearRightWheelTurnsCount, RISING);
 	enableInterrupt(FrontLeftEncoderPin, &FrontLeftWheelTurnsCount, RISING);
 	enableInterrupt(FrontRightEncoderPin, &FrontRightWheelTurnsCount, RISING);
-	//attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(FrontRightEncoderPin), &FrontRightWheelTurnsCount, RISING);
+	
 
 	interruptCount.setCallback(&callbackdetachInterrupt);
 	interruptCount.forceNextIteration();
@@ -377,18 +377,17 @@ void runInterrupt(unsigned long aTimeout){
 	interruptCount.setInterval(aTimeout);
 	interruptCount.restartDelayed();
 
-	//attachPinChangeInterrupt(interruptPin, &wheelTurnsCount, CHANGE);
-
+	
 }
 
 void callbackdetachInterrupt() {
-	if ((millis() - startTime) > 10000) {
+	if ((millis() - startTime) > 1000) {
 		
 		disableInterrupt(RearLeftEncoderPin);
 		disableInterrupt(RearRightEncoderPin);
 		disableInterrupt(FrontLeftEncoderPin);
 		disableInterrupt(FrontRightEncoderPin);
-		//detachPinChangeInterrupt(digitalPinToPinChangeInterrupt(FrontRightEncoderPin));
+		
 		interruptCount.disable();
 	}
 
@@ -411,9 +410,7 @@ void  onDisableInterrupt() {
 
 	FrontRightWheelCurrentTurnCount = FrontRightWheelTurns;
 	FrontRightWheelTurns = 0;
-	//Serial.print("THe wheelCount is:");
-	//Serial.println(RearLeftWheelCurrentTurnCount);
-	
+		
 	Blynk.virtualWrite(V2, RearLeftWheelCurrentTurnCount);
 	Blynk.virtualWrite(V3, RearRightWheelCurrentTurnCount);
 	Blynk.virtualWrite(V4, FrontLeftWheelCurrentTurnCount);
