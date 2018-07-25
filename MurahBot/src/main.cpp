@@ -10,10 +10,10 @@
 #include <TaskSchedulerDeclarations.h>
 #include <Bounce2.h>
 #include <DigitalIO.h>
-#include <PinChangeInterrupt.h>
+#include <EnableInterrupt.h>
 
 #define BLYNK_USE_DIRECT_CONNECT
-#define MurahBotBT Serial1
+#define MurahBotBT Serial3
 
 #include <BlynkSimpleSerialBLE.h>
 
@@ -22,10 +22,10 @@
 char auth[] = "66390b83798e4495aa9d6c23724f2181"; //Blynk Authorization code
 
 ///////////////////////////////////////////////////////////////////////////
-#define RearLeftEncoderPin 53 //test pinchange interrupt
-#define RearRightEncoderPin 52
-#define FrontLeftEncoderPin 51
-#define FrontRightEncoderPin 50
+#define RearLeftEncoderPin 20 //test pinchange interrupt
+#define RearRightEncoderPin 21
+#define FrontLeftEncoderPin 18
+#define FrontRightEncoderPin 19
 
 
 
@@ -39,10 +39,10 @@ unsigned long startTime;
 
 ///////////////////////////////////////////////////////////////////////////
 // Wheel class and Drive4Wheel class instantiation 
-Wheel WheelFrontLeft(42, 43, 3);  //initializing each wheels with (forwardPin, backwardPin, speedPin)
-Wheel WheelFrontRight(38, 39, 4);
-Wheel WheelRearLeft(30, 31, 7);
-Wheel WheelRearRight(34, 35, 6);
+Wheel WheelFrontLeft(42, 43, 11);  //initializing each wheels with (forwardPin, backwardPin, speedPin)
+Wheel WheelFrontRight(38, 39, 10);
+Wheel WheelRearLeft(30, 31, 9);
+Wheel WheelRearRight(34, 35, 8);
 
 int speedTolerance = 30; //range of tolerance for drive speeds
 Drive4Wheel murahDrive(WheelFrontLeft, WheelFrontRight,
@@ -361,10 +361,11 @@ bool onEnableInterrupt() {
 void callbackattachInterrupt() {
 	counting = true;
     startTime = millis();
-	attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(RearLeftEncoderPin), &RearLeftWheelTurnsCount, RISING); //used the correct function
-	attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(RearRightEncoderPin), &RearRightWheelTurnsCount, RISING);
-	attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(FrontLeftEncoderPin), &FrontLeftWheelTurnsCount, RISING);
-	attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(FrontRightEncoderPin), &FrontRightWheelTurnsCount, RISING);
+	enableInterrupt(RearLeftEncoderPin, &RearLeftWheelTurnsCount, RISING);
+	enableInterrupt(RearRightEncoderPin, &RearRightWheelTurnsCount, RISING);
+	enableInterrupt(FrontLeftEncoderPin, &FrontLeftWheelTurnsCount, RISING);
+	enableInterrupt(FrontRightEncoderPin, &FrontRightWheelTurnsCount, RISING);
+	//attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(FrontRightEncoderPin), &FrontRightWheelTurnsCount, RISING);
 
 	interruptCount.setCallback(&callbackdetachInterrupt);
 	interruptCount.forceNextIteration();
@@ -383,10 +384,11 @@ void runInterrupt(unsigned long aTimeout){
 void callbackdetachInterrupt() {
 	if ((millis() - startTime) > 10000) {
 		
-		detachPinChangeInterrupt(digitalPinToPinChangeInterrupt(RearLeftEncoderPin));
-		detachPinChangeInterrupt(digitalPinToPinChangeInterrupt(RearRightEncoderPin));
-		detachPinChangeInterrupt(digitalPinToPinChangeInterrupt(FrontLeftEncoderPin));
-		detachPinChangeInterrupt(digitalPinToPinChangeInterrupt(FrontRightEncoderPin));
+		disableInterrupt(RearLeftEncoderPin);
+		disableInterrupt(RearRightEncoderPin);
+		disableInterrupt(FrontLeftEncoderPin);
+		disableInterrupt(FrontRightEncoderPin);
+		//detachPinChangeInterrupt(digitalPinToPinChangeInterrupt(FrontRightEncoderPin));
 		interruptCount.disable();
 	}
 
